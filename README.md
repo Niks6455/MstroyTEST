@@ -11,15 +11,13 @@ npm install
 npm run dev
 ```
 
-Приложение откроется по адресу из вывода Vite (обычно `http://localhost:5173`).
-
 ### Команды
 
 ```bash
-npm run typecheck   # проверка TypeScript
-npm run test        # unit-тесты (Vitest)
-npm run build       # production-сборка
-npm run preview     # просмотр сборки
+npm run typecheck
+npm run test
+npm run build
+npm run preview
 ```
 
 ## TreeStore
@@ -41,6 +39,7 @@ npm run preview     # просмотр сборки
 
 ```bash
 npm test
+npm test nameTest...
 ```
 
 - **TreeStore** — позитивные и отрицательные сценарии (`tests/store/`): CRUD, порядок `getAllParents`, защита от дубликатов и циклов.
