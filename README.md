@@ -1,40 +1,49 @@
 # MstroyTEST
-Тестовое задание для MStroy.
 
-## Запуск проекта
+Тестовое задание MStroy: `TreeStore` + Vue-таблица на AG Grid.
 
-Требования: установленный Node.js (рекомендуется LTS-версия).
+## Запуск
+
+Требования: Node.js (рекомендуется LTS).
 
 ```bash
 npm install
 npm run dev
 ```
 
-После запуска приложение будет доступно по адресу из вывода Vite (обычно `http://localhost:5173`).
+Приложение откроется по адресу из вывода Vite (обычно `http://localhost:5173`).
 
-### Полезные команды
+### Команды
 
 ```bash
-npm run typecheck
-npm run test
-npm run build
-npm run preview
+npm run typecheck   # проверка TypeScript
+npm run test        # unit-тесты (Vitest)
+npm run build       # production-сборка
+npm run preview     # просмотр сборки
 ```
 
-## Что реализовано
+## TreeStore
 
-Проект включает:
-- `TreeStore` на TypeScript для хранения и операций с деревом;
-- Vue-компонент таблицы на базе `ag-grid-vue3` (+ `ag-grid-enterprise` для tree/group функциональности).
+Индексы на `Map` для быстрых операций без полного обхода массива на чтение.
 
-## Методы `TreeStore`
+| Метод | Описание |
+|-------|----------|
+| `getAll()` | Копия текущего списка элементов |
+| `getItem(id)` | Элемент по `id` |
+| `getChildren(id)` | Прямые дочерние элементы |
+| `getAllChildren(id)` | Все потомки |
+| `getAllParents(id)` | Цепочка от узла к корню (порядок важен) |
+| `addItem(item)` | Добавление; игнорируется при дубликате `id` или несуществующем `parent` |
+| `updateItem(item)` | Обновление; перенос отклоняется, если `parent` — сам узел, его потомок или несуществующий id |
+| `removeItem(id)` | Удаление поддерева; swap-remove в массиве без `filter` |
 
-Реализованы следующие методы:
-- `getAll()` — возвращает текущий список элементов хранилища;
-- `getItem(id)` — возвращает элемент по `id`;
-- `getChildren(id)` — возвращает прямых дочерних элементов;
-- `getAllChildren(id)` — возвращает всех потомков элемента;
-- `getAllParents(id)` — возвращает цепочку родителей до корня;
-- `addItem(item)` — добавляет новый элемент;
-- `updateItem(item)` — обновляет существующий элемент;
-- `removeItem(id)` — удаляет элемент вместе со всем его поддеревом.
+## Тесты
+
+```bash
+npm test
+```
+
+- **TreeStore** — позитивные и отрицательные сценарии (`tests/store/`): CRUD, порядок `getAllParents`, защита от дубликатов и циклов.
+- **TreeGrid** — `tests/components/TreeGrid.test.ts`: stub `AgGridVue`, мок `useTreeGrid`; проверяется передача props (`treeData`, колонки, пустые данные).
+
+Тесты компонента не поднимают реальную сетку — только контракт Vue-обёртки.

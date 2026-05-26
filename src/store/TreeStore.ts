@@ -31,9 +31,9 @@ export class TreeStore<TItem extends TreeNodeBase> {
     }
   }
 
-  /** Возвращает текущий список элементов в хранилище. */
+  /** Возвращает копию текущего списка элементов в хранилище. */
   public getAll(): TItem[] {
-    return this.items;
+    return [...this.items];
   }
 
   /** Возвращает элемент по id или undefined, если элемент не найден. */
@@ -98,8 +98,16 @@ export class TreeStore<TItem extends TreeNodeBase> {
     return result;
   }
 
-  /** Добавляет новый элемент и обновляет внутренние индексы. */
+  /** Добавляет новый элемент. Игнорирует добавление, если id уже существует. */
   public addItem(newItem: TItem): void {
+    if (this.byId.has(newItem.id)) {
+      return;
+    }
+
+    if (newItem.parent !== null && !this.byId.has(newItem.parent)) {
+      return;
+    }
+
     this.items.push(newItem);
     this.byId.set(newItem.id, newItem);
     this.indexById.set(newItem.id, this.items.length - 1);
@@ -120,6 +128,10 @@ export class TreeStore<TItem extends TreeNodeBase> {
     }
 
     if (existingItem.parent !== updatedItem.parent) {
+      if (!this.isValidParent(updatedItem.id, updatedItem.parent)) {
+        return;
+      }
+
       this.removeChildReference(existingItem.parent, updatedItem.id);
       const newParentChildren = this.childrenIdsByParent.get(updatedItem.parent);
       if (newParentChildren) {
@@ -138,6 +150,43 @@ export class TreeStore<TItem extends TreeNodeBase> {
 
   /** Удаляет элемент и все его дочерние элементы из хранилища. */
   public removeItem(id: TreeNodeId): void {
+    if (!this.byId.has(id)) {
+      return;
+    }
+
+    const idsToDelete = this.collectSubtreeIds(id);
+    const rootItem = this.byId.get(id)!;
+    this.removeChildReference(rootItem.parent, id);
+
+    const indicesToRemove: number[] = [];
+    for (const itemId of idsToDelete) {
+      const itemIndex = this.indexById.get(itemId);
+      if (itemIndex !== undefined) {
+        indicesToRemove.push(itemIndex);
+      }
+    }
+
+    indicesToRemove.sort((left, right) => right - left);
+
+    for (const removeIndex of indicesToRemove) {
+      const lastIndex = this.items.length - 1;
+      if (removeIndex < lastIndex) {
+        const movedItem = this.items[lastIndex]!;
+        this.items[removeIndex] = movedItem;
+        this.indexById.set(movedItem.id, removeIndex);
+      }
+      this.items.pop();
+    }
+
+    for (const itemId of idsToDelete) {
+      this.byId.delete(itemId);
+      this.indexById.delete(itemId);
+      this.childrenIdsByParent.delete(itemId);
+    }
+  }
+
+  /** Собирает id узла и всех его потомков. */
+  private collectSubtreeIds(id: TreeNodeId): Set<TreeNodeId> {
     const idsToDelete = new Set<TreeNodeId>([id]);
     const queue: TreeNodeId[] = [id];
     let head = 0;
@@ -159,22 +208,24 @@ export class TreeStore<TItem extends TreeNodeBase> {
       }
     }
 
-    const rootItem = this.byId.get(id);
-    if (rootItem) {
-      this.removeChildReference(rootItem.parent, id);
+    return idsToDelete;
+  }
+
+  /** Проверяет, что parent не создаёт цикл (сам узел или его потомок). */
+  private isValidParent(itemId: TreeNodeId, parentId: TreeNodeId | null): boolean {
+    if (parentId === null) {
+      return true;
     }
 
-    this.items = this.items.filter((item) => !idsToDelete.has(item.id));
-    this.indexById.clear();
-    for (let index = 0; index < this.items.length; index += 1) {
-      this.indexById.set(this.items[index]!.id, index);
+    if (parentId === itemId) {
+      return false;
     }
 
-    for (const itemId of idsToDelete) {
-      this.byId.delete(itemId);
-      this.indexById.delete(itemId);
-      this.childrenIdsByParent.delete(itemId);
+    if (!this.byId.has(parentId)) {
+      return false;
     }
+
+    return !this.collectSubtreeIds(itemId).has(parentId);
   }
 
   /** Удаляет связь дочернего элемента с родителем в индексе childrenIdsByParent. */
