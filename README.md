@@ -16,6 +16,7 @@ npm run dev
 
 ```bash
 npm run typecheck
+npm run test
 npm run build
 npm run preview
 ```
