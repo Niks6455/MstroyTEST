@@ -1,0 +1,49 @@
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-quartz.css';
+@import '@/styles/tables/tree-grid.css';
+
+:root {
+  font-family: Inter, sans-serif;
+  line-height: 1.4;
+  font-weight: 400;
+  color: #20242d;
+  background-color: #f4f6fb;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+.title {
+  margin: 0 0 20px;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.mode-selector {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  margin: 20px 0px 5px 0px;
+  color: rgb(35, 137, 188);
+}

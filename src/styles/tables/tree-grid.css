@@ -1,0 +1,16 @@
+.table-wrapper {
+  width: 100%;
+}
+
+.table-wrapper .table-grid {
+  width: 100%;
+}
+
+.table-wrapper .group-highlight {
+  color: #111827;
+  font-weight: 700;
+}
+
+.table-wrapper .item-muted {
+  color: #4b5563;
+}
